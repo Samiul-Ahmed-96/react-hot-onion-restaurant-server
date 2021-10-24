@@ -2,7 +2,12 @@ const { MongoClient } = require('mongodb');
 const express = require('express');
 require('dotenv').config()
 const app = express();
+const cors = require('cors');
 const port = 5000;
+
+//Middleware
+app.use(cors());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.iy3km.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -14,17 +19,22 @@ async function run(){
         const database = client.db('HotOnion');
         const foodCollection = database.collection('foods');
 
+        //Get api
+        app.get('/items',async(req,res)=>{
+            const cursor = foodCollection.find({})
+            const items  = await cursor.toArray();
+            res.send(items);
+        })
+
         //Post Api
-        app.post('/foods',async(req,res)=>{
-            const food = {
-                name : 'Rice',
-                des : 'Food',
-                price: 110,
-                rating : 4.2
-                
-            };
+        app.post('/items',async(req,res)=>{
+            const food = req.body;
+            console.log(food);
+            console.log('hit the api')
+            
             const result = await foodCollection.insertOne(food);
             console.log(result);
+            res.send(result);
         })
     }
     finally{
