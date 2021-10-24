@@ -3,6 +3,7 @@ const express = require('express');
 require('dotenv').config()
 const app = express();
 const cors = require('cors');
+const ObjectId = require('mongodb').ObjectId;
 const port = 5000;
 
 //Middleware
@@ -25,7 +26,13 @@ async function run(){
             const items  = await cursor.toArray();
             res.send(items);
         })
-
+        //Get single item
+        app.get('/items/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id : ObjectId(id)};
+            const item = await foodCollection.findOne(query);
+            res.json(item);
+        })
         //Post Api
         app.post('/items',async(req,res)=>{
             const food = req.body;
